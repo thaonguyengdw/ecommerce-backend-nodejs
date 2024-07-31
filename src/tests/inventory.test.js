@@ -9,12 +9,12 @@ class InventoryService {
         })
 
     }
-    updateInventory({ productId, quantity }){
+    static updateInventory({ productId, quantity }){
 
         //update the inventory logic
         console.log(`[0001]: Update inventory ${productId} with quantity ${quantity}`)
     }
 }
-//InventoryService.updateInventory({ productId: 'product:001', quantity: 10 })
+InventoryService.updateInventory({ productId: 'product:001', quantity: 10 })
 
 module.exports =  InventoryService
