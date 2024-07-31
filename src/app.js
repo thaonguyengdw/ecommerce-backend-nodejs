@@ -17,14 +17,17 @@ app.use(express.urlencoded({
 //test pub.sub redis
 
 
-const productTest = require('./tests/product.test')
-productTest.purchaseProduct('product:001', 10)
-require('./tests/inventory.test')
 
 // init db
 require('./dbs/init.mongodb')
-const initRedis = require('./dbs/init.redis')
-initRedis.initRedis()
+const {initRedis} = require('./dbs/init.redis')
+initRedis()
+
+require('./tests/inventory.test')
+
+const productTest = require('./tests/product.test')
+productTest.purchaseProduct('product:001', 10)
+
 // const { checkOverLoad } = require('./helpers/check.connect')
 // checkOverLoad()
 // init routes
