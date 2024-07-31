@@ -17,4 +17,4 @@ class InventoryService {
 }
 InventoryService.updateInventory({ productId: 'product:001', quantity: 10 })
 
-module.exports =  InventoryService
+module.exports =  new InventoryService()

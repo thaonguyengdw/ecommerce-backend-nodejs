@@ -1,71 +1,85 @@
-'use strict'
-
-/*const redis = require('redis')
-
- //create a new client 
-
-const client = redis.createClient({
-    host,
-    port,
-    password,
-    username
-})
-
-client.on('error', err => {
-    console.log(`Redis error: ${err}`)
-})
-
-//export
-module.exports = client */
-
-const redis = require('redis')
+'use strict';
+const { createClient } = require('redis');
+const { RedisErrorRespone } = require('../core/error.response');
+require('dotenv').config();
 
 let client = {}, statusConnectRedis = {
     CONNECT: 'connect',
     END: 'end',
     RECONNECT: 'reconnecting',
     ERROR: 'error'
+}, connectTimeout;
+
+const REDIS_CONNECT_TIMEOUT = 10000;
+const REDIS_CONNECT_MESSAGE = {
+    code: -99,
+    message: {
+        vn: ` Không thể kết nối đến Redis trong ${REDIS_CONNECT_TIMEOUT} ms`,
+        en: `Cannot connect to Redis in ${REDIS_CONNECT_TIMEOUT} ms`
+    }
 }
 
-const handleEventConnection = ({
-    connectionRedis
-}) => {
-    //check if connection is null
-    
+const handleTimeoutError = () => {
+    connectTimeout = setTimeout(() => {
+        throw new RedisErrorRespone({
+            message: REDIS_CONNECT_MESSAGE.message.vn,
+            statusCode: REDIS_CONNECT_MESSAGE.code
+        })
+    }, REDIS_CONNECT_TIMEOUT);
+}
+
+const handleEventConnect = ({ connectionRedis }) => {
     connectionRedis.on(statusConnectRedis.CONNECT, () => {
         console.log(`connectionRedis - Connection status: connected`)
+        clearTimeout(connectTimeout);
     })
-    
+
     connectionRedis.on(statusConnectRedis.END, () => {
         console.log(`connectionRedis - Connection status: disconnected`)
+        handleTimeoutError();
     })
 
     connectionRedis.on(statusConnectRedis.RECONNECT, () => {
         console.log(`connectionRedis - Connection status: reconnecting`)
+        clearTimeout(connectTimeout);
     })
 
-    connectionRedis.on(statusConnectRedis.ERROR, (err) => {
-        console.log(`connectionRedis - Connection status: error ${err}`)
+    connectionRedis.on(statusConnectRedis.ERROR, (error) => {
+        console.log(`connectionRedis - Connection status: ERROR ${error}`)
+        handleTimeoutError();
     })
-    connectionRedis.connect()
+
+    connectionRedis.connect();
 }
 
 const initRedis = () => {
-    const instanceRedis = redis.createClient()
-    client.instanceRedis = instanceRedis
-    handleEventConnection({
-        connectionRedis: instanceRedis
-    })
-}
+    try {
+        const instanceRedisPub = createClient(); // Client cho PUBLISH
+        const instanceRedisSub = createClient(); // Client cho SUBSCRIBE
+        const instanceRedisOther = createClient(); // Client cho SET, HASH, v.v.
 
-const getRedis = () => client
+        client.instanceConnectPub = instanceRedisPub;
+        client.instanceConnectSub = instanceRedisSub;
+        client.instanceConnectOther = instanceRedisOther;
+
+        handleEventConnect({ connectionRedis: instanceRedisPub });
+        handleEventConnect({ connectionRedis: instanceRedisSub });
+        handleEventConnect({ connectionRedis: instanceRedisOther });
+    } catch (error) {
+        console.log('Error in Redis initRedis', error);
+    }
+};
+
+const getRedis = () => client;
 
 const closeRedis = () => {
-
-}
+    client.instanceConnectPub.disconnect();
+    client.instanceConnectSub.disconnect();
+    client.instanceConnectOther.disconnect();
+};
 
 module.exports = {
     initRedis,
     getRedis,
-    closeRedis
-}
+    closeRedis,
+};
