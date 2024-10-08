@@ -7,7 +7,7 @@ const HEADER = {
 
 const { findById } = require('../services/apikey.service')
 const apiKey = async (req, res, next) => {
-    try{
+    try{                                                                                                              
         const key = req.headers[HEADER.API_KEY]?.toString()
         //Neu key khong ton tai thong bao cho client biet
         if(!key){
@@ -26,26 +26,27 @@ const apiKey = async (req, res, next) => {
         req.objKey = objKey
         return next()
     }catch (error){
-
+        console.error(error);
+        return res.status(500).json({ message: 'Internal Server Error' });
     }
 }
 
-const permission = (permission) => {
-    return (req, res, next) => {
-        if(!req.objKey.permissions){
+const permission = (permission)=>{
+    return (req,res,next)=>{
+        if(!req.objKey.permissions)
+        {
             return res.status(403).json({
-                message: 'Permission denied error'
+                message:"forbidden error perrmissions"
             })
         }
-
-        console.log('permission::', req.objKey.permissions)
-        const validPermission = req.objKey.permissions.includes(permission)
-        if(!validPermission){
+        console.log(`permissions::`,req.objKey.permissions)
+        const validPermisson=req.objKey.permissions.includes(permission)
+        if(!validPermisson)
+        {
             return res.status(403).json({
-                message: 'Permission denied error'
+                message:'permission denied'
             })
         }
-
         return next()
     }
 }

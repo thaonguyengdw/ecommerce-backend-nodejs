@@ -10,16 +10,32 @@ const ReasonStatusCode = {
     CONFLICT: 'Conflict error'
 }
 
+const myLogger = require('../loggers/myLogger.log.js'); 
 const {StatusCodes, ReasonPhrases} = require('../utils/httpStatusCode')
 
 class ErrorResponse extends Error {
 
     constructor(message, status) {
         super(message)
-        this.status = status
+        this.status = status,
+        this.now = Date.now()
+        
+/*         myLogger.error(this.message, {
+            context: '/path',
+            requestId: 'UUUAAA',
+            message: this.message,
+            metadata: {},
+        }) */
+
+        //  myLogger.error(this.message, ['/v1/api/login', 'vv33344', { error: 'Bad request error' }]);
     }
 }
 
+class RedisErrorResponse extends Error {
+    constructor(message = ReasonStatusCode.CONFLICT, statusCode =  StatusCode.FORBIDDEN) {
+        super(message, statusCode)
+    }
+}
 class ConflictRequestError extends ErrorResponse{
 
     constructor(message = ReasonStatusCode.CONFLICT, statusCode =  StatusCode.FORBIDDEN) {
@@ -56,11 +72,13 @@ class ForbiddenError extends ErrorResponse{
 }
 
 module.exports = {
+    ErrorResponse,
     ConflictRequestError,
     BadRequestError,
     AuthFailureError,
     NotFoundError,
-    ForbiddenError
+    ForbiddenError,
+    RedisErrorResponse
 }
 
 

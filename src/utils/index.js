@@ -58,6 +58,20 @@ const updateNestedObjectParser = obj => {
     console.log(`2::`, final)
     return final
 }
+/*
+ new RegExp(placeholder, 'g') creates a regular expression to search for the placeholder globally in the template string.
+The g flag ensures that all instances of the placeholder in the string are replaced (not just the first).
+template.replace(...) replaces all instances of placeholder with the corresponding value in the params object (params[key]).
+replacePlaceholder
+{{lastname}}
+ */
+const replacePlaceholder = (template, params) => {
+    Object.keys(params).forEach(k => {
+        const placeholder = `{{${k}}}` // {{verifyKey}}
+        template = template.replace(new RegExp(placeholder, 'g'), params[k])
+    })
+    return template;
+}
 
 module.exports = {
     getInfoData,
@@ -65,5 +79,6 @@ module.exports = {
     unGetSelectData,
     removeUndefinedObject,
     updateNestedObjectParser,
-    convertToObjectIdMongodb
+    convertToObjectIdMongodb,
+    replacePlaceholder
 }

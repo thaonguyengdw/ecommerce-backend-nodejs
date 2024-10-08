@@ -3,6 +3,7 @@
 const AccessService = require("../services/access.service")
 
 const { OK, CREATED, SuccessResponse } = require("../core/success.response");
+const { BadRequestError } = require("../core/error.response")
 class AccessController {
 
 	handlerRefreshToken = async (req, res, next ) => {
@@ -32,8 +33,19 @@ class AccessController {
 	}
 
 	login = async (req, res, next) => {
+		const { email } = req.body
+		if(!email) {
+			throw new BadRequestError('email missing...')
+		}
+		const sendData = Object.assign(
+			{ requestId: req.id },
+			req.body
+		)
+
+		const { code, ...result } = await AccessService.login(sendData)
+
 		new SuccessResponse({
-			metadata: await AccessService.login(req.body),
+			metadata: result,
 		}).send(res)
 	}
 

@@ -3,7 +3,7 @@
 const { model, Schema } = require('mongoose')
 
 const DOCUMENT_NAME = 'Cart'
-const COLLECTION_NAME =  'Carts'
+const COLLECTION_NAME = 'Carts'
 
 const cartSchema = new Schema({
     cart_state: {

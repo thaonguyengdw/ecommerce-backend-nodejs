@@ -1,12 +1,6 @@
 const app = require("./src/app");
+const {app:{port}}= require('./src/configs/config.mongodb')
 
-const PORT = process.env.PORT || 3056
-
-const server = app.listen( PORT, () => {
-    console.log(`WSV eCommerse stars with ${PORT}`) 
+const sever = app.listen(port,()=>{
+    console.log(`Ecommer start with PORT : ${port}`)
 })
-
-// process.on('SIGINT', () => {
-//     server.close( () => console.log(`Exit Server Express`))
-//     // notify.send( ping... )
-// })
